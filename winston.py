@@ -1,27 +1,31 @@
 import discord
 import asyncio
+from commands import say
+from commands import commands
 
 client = discord.Client()
+token = "MzgyNTYzNDk0OTIwMTkyMDEx.DPXhng.qa786qE11E9B2jXD46Pum9k7kOk"
+prefix = "w!"
 
 @client.event
 async def on_ready():
-  print('Logged in as')
+  print("Logged in as")
   print(client.user.name)
   print(client.user.id)
-  print('------')
+  print("------")
 
 @client.event
 async def on_message(message):
-  if message.content.startswith('!test'):
-    counter = 0
-    tmp = await client.send_message(message.channel, 'Calculating messages...')
-    async for log in client.logs_from(message.channel, limit=100):
-      if log.author == message.author:
-        counter += 1
-        
-      await client.edit_message(tmp, 'You have {} messages.'.format(counter))
-  elif message.content.startswith('!sleep'):
-    await asyncio.sleep(5)
-    await client.send_message(message.channel, 'Done sleeping')
+	await process_command(message)
+	
 
-client.run('token')
+async def process_command(message):
+	if message.content.startswith(prefix):
+		m = message.content.split(" ")
+		command = m[0][len(prefix):]
+		
+		if command in commands:
+			await commands[command](message)
+
+
+client.run(token)
