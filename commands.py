@@ -1,4 +1,5 @@
 import asyncio
+from settings import settings
 
 commands = {}
 
@@ -17,6 +18,7 @@ def command(alias=None, pass_ctx=True):
 					await func()
 			except Exception as e:
 				print("Error in function ", func.__name__, ":\n", e)
+		wrapper.__doc__  = func.__doc__
 		
 		if alias == None:
 			name = func.__name__
@@ -30,16 +32,32 @@ def command(alias=None, pass_ctx=True):
 
 # --- commands --- #
 
-# command example
+@command()
+async def help(ctx):
+	"""Prints the docstring for a specific command"""
+	docstring = commands[ctx.args[0]].__doc__
+	
+	if docstring == None:
+		docstring = "No information provided"
+	
+	await ctx.client.send_message(ctx.channel, docstring)
+
 @command()
 async def rank(ctx):
+	"""Gives or removes roles"""
 	server_roles = ctx.server.roles
-	roles = []
+	user_roles = [ role.name for role in ctx.author.roles ]
+	add_roles = []
+	remove_roles = []
 	
 	for arg in ctx.args:
 		for role in server_roles:
-			if arg.upper() == role.name.upper():
-				roles.append(role)
+			if arg in settings.roles and arg == role.name:
+				if arg in user_roles:
+					remove_roles.append(role)
+				add_roles.append(role)
+				break
 	
-	await ctx.client.add_roles(ctx.author, *roles)
+	await ctx.client.add_roles(ctx.author, *add_roles)
+	await ctx.client.remove_roles(ctx.author, *remove_roles)
 	await ctx.client.delete_message(ctx.message)

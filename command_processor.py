@@ -22,5 +22,4 @@ class CommandProcessor:
 				}
 				
 				ctx = Context(**tmp)
-				
 				await commands[command](ctx)
