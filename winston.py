@@ -5,7 +5,8 @@ from command_processor import CommandProcessor
 from commands import Commands
 from settings import settings
 
-client = discord.Client()
+loop = asyncio.get_event_loop()
+client = discord.Client(loop=loop)
 cp = CommandProcessor(client, settings.prefix)
 cp.reload_commands(cp.command)
 
@@ -18,14 +19,14 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+	# TODO: handle moderation thing
 	await cp.process_command(message)
-
-client.run(settings.token)
 
 try:
 	loop.run_until_complete(client.login(settings.token))
 	loop.run_until_complete(client.connect())
-except KeyboardInterrupt:
+except Exception as e:
+	print(e)
 	loop.run_until_complete(logout())
 finally:
 	loop.close()
